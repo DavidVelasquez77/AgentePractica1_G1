@@ -1,0 +1,52 @@
+# Secrets — never commit
+.env
+.env.local
+.env.*.local
+!.env.example
+*.pem
+*.key
+credentials.json
+service-account*.json
+**/secrets/
+
+# Python
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.python-version
+
+# Generated analysis artifacts
+outputs/figures/*.png
+outputs/figures/*.svg
+outputs/*.json
+!outputs/.gitkeep
+!outputs/figures/.gitkeep
+
+# Supabase CLI local state
+supabase/.temp/
+supabase/.branches/
+supabase/.env
+
+# Node (CLI local install)
+node_modules/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+*~

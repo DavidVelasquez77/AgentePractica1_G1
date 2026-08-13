@@ -1,0 +1,57 @@
+Project {
+  database_type: 'PostgreSQL'
+  Note: 'SOG2 2S26 — ventas online 2021 (Supabase)'
+}
+
+Table catalogo_genero {
+  codigo smallint [pk]
+  nombre text [not null, unique]
+  Note: '0 Masculino, 1 Femenino'
+}
+
+Table catalogo_metodo_pago {
+  codigo smallint [pk]
+  nombre text [not null, unique]
+  Note: '0 Efectivo (incluye contra entrega), 1 Tarjeta de Credito, 2 Tarjeta de Debito'
+}
+
+Table catalogo_navegador {
+  codigo smallint [pk]
+  nombre text [not null, unique]
+  Note: '0 Tienda Fisica, 1-4 Navegadores web'
+}
+
+Table clientes {
+  id_cliente integer [pk]
+  edad smallint [not null]
+  genero_id smallint [not null, ref: > catalogo_genero.codigo]
+  venta_total numeric(12,2) [not null]
+  n_compras integer [not null]
+  created_at timestamptz [not null, default: `now()`]
+  updated_at timestamptz [not null, default: `now()`]
+
+  indexes {
+    genero_id
+  }
+}
+
+Table compras {
+  id bigint [pk, increment]
+  id_cliente integer [not null, ref: > clientes.id_cliente]
+  fecha_compra date [not null]
+  monto_compra numeric(12,3) [not null]
+  metodo_pago_id smallint [not null, ref: > catalogo_metodo_pago.codigo]
+  tiempo integer [not null]
+  navegador_id smallint [not null, ref: > catalogo_navegador.codigo]
+  boletin boolean [not null]
+  vale boolean [not null]
+  created_at timestamptz [not null, default: `now()`]
+  updated_at timestamptz [not null, default: `now()`]
+
+  indexes {
+    id_cliente
+    fecha_compra
+    metodo_pago_id
+    navegador_id
+  }
+}
