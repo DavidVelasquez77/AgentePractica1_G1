@@ -33,6 +33,9 @@ outputs/*.json
 !outputs/.gitkeep
 !outputs/figures/.gitkeep
 
+# ADK local sessions
+**/.adk/
+
 # Supabase CLI local state
 supabase/.temp/
 supabase/.branches/

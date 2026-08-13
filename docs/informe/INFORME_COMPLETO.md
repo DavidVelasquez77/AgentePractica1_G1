@@ -28,7 +28,7 @@ Jueves 12 de agosto de 2026
 
 ---
 
-> Nota para pasar a Word: deja el sello USAC en la portada. Donde hay una figura, inserta el PNG indicado desde `outputs/figures/`. Completa nombres, carnets y número de grupo. Exporta el ER desde [dbdiagram.io](https://dbdiagram.io) pegando `db/schema.dbml`.
+> Nota para pasar a Word: deja el sello USAC en la portada. Copia este archivo sección por sección. Donde hay una figura, inserta el PNG. Completa nombres, carnets y número de grupo. El ER ya está en `db/schema.png`.
 
 ---
 
@@ -411,11 +411,11 @@ Implementarlo implica costo de API (Gemini Flash-Lite es el punto barato), costo
 
 El modelo es relacional (PostgreSQL en Supabase). No se dejó una tabla única equivalente al CSV.
 
-**Cómo generar la figura para Word:** abrir [https://dbdiagram.io](https://dbdiagram.io), pegar el contenido de `db/schema.dbml`, exportar PNG e insertar aquí.
+El PNG del ER está en el repositorio. En Word: Insertar > Imagen > `db/schema.png`. El origen editable es `db/schema.dbml` (dbdiagram.io).
 
-![Figura 9. Diagrama entidad-relación (pegar export de dbdiagram.io).](../../db/schema.dbml)
+![Figura 9. Diagrama entidad-relación.](../../db/schema.png)
 
-*Figura 9. ER: catálogos, clientes y compras. Fuente: `db/schema.dbml`.*
+*Figura 9. ER: catálogos, clientes y compras. Fuente: elaboración propia a partir de `db/schema.dbml` / dbdiagram.io.*
 
 **Entidades**
 
