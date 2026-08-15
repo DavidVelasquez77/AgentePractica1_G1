@@ -1,6 +1,8 @@
-# Practica SOG2 - Analisis de ventas online 2021
+# AgentePractica1_G1
 
-Repositorio del grupo: analista junior, base relacional en Supabase (nube), Python, Google ADK + MCP Server, modelo Gemini 3.5 Flash-Lite.
+Practica SOG2: analista junior, base relacional en Supabase (nube), Python, Google ADK + MCP Server, modelo Gemini 3.5 Flash-Lite.
+
+Nombre del repositorio publico (indicacion del auxiliar): `AgentePractica1_G1`. El PDF debe incluir el link de GitHub.
 
 ## Requisitos
 

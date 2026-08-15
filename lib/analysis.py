@@ -123,7 +123,10 @@ def tendencias(df: pd.DataFrame | None = None) -> dict:
         "navegador_menos_popular": nav[-1] if nav else None,
         "navegadores": nav,
         "ventas_efectivo_o_contra_entrega": {
-            "nota": "MetodoPago=0 (Efectivo) se interpreta como pago en efectivo / contra entrega.",
+            "nota": (
+                "Auxiliar (13-ago-2026): MetodoPago=0 cuenta como Efectivo y como "
+                "contra entrega. Tarjeta de credito o debito NO es contra entrega."
+            ),
             "n": int(len(efectivo)),
             "venta_total": float(efectivo["monto_compra"].sum()),
             "porcentaje_transacciones": float(len(efectivo) / len(df) * 100) if len(df) else 0,
