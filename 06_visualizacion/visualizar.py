@@ -25,6 +25,8 @@ def main() -> None:
             "heatmap (boletin vs vale)",
             "histograma (edad)",
             "barras (navegador)",
+            "barras (ventas por boletin)",
+            "barras (ventas por vale)",
         ],
         "archivos": paths,
     }
