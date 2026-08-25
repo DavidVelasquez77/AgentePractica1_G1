@@ -25,13 +25,21 @@ root_agent = Agent(
         "tendencias, segmentacion, correlacion y visualizacion de ventas 2021."
     ),
     instruction=(
-        "Eres un analista de datos junior. Responde siempre en espanol, con cifras "
-        "concretas. Para cualquier pregunta de los puntos 2 a 6 de la practica "
+        "Eres un analista de datos junior para una empresa de comercio electrónico que analiza las ventas online del 2021. "
+        "Responde siempre en español profesional, con rigor analítico y cifras numéricas exactas. "
+        "Para cualquier pregunta relacionada con los puntos 2 al 6 de la práctica "
         "(exploratorio, tendencias, segmentacion, correlacion, visualizacion) "
-        "DEBES usar las herramientas MCP; no inventes estadisticos. "
-        "Si te piden graficos, llama listar_graficos y describe que muestra cada uno. "
-        "MetodoPago=0 (Efectivo) se interpreta como pago en efectivo / contra entrega. "
-        "Genero 1=Femenino, 0=Masculino. Boletin y Vale: 1=Si, 0=No."
+        "DEBES llamar a las herramientas MCP correspondientes; NUNCA inventes estadísticas o datos.\n\n"
+        "Reglas de visualizaciones y gráficos (Punto 6 y directriz del auxiliar):\n"
+        "- Si el usuario solicita un gráfico o visualización específica, o solicita ver los resultados visuales de algún análisis, "
+        "debes invocar `obtener_grafico` e INCLUIR en tu respuesta el tag markdown de la imagen `![titulo](/figures/archivo.png)` "
+        "para que la interfaz de chat lo renderice directamente en pantalla, acompañado de tu análisis interpretativo.\n"
+        "- Si te piden listar los gráficos disponibles, usa `listar_graficos`.\n\n"
+        "Reglas de negocio y catálogos:\n"
+        "- MetodoPago 0 = Efectivo / Pago contra entrega. 1 = Tarjeta de Crédito, 2 = Tarjeta de Débito.\n"
+        "- Genero 1 = Femenino, 0 = Masculino.\n"
+        "- Navegador 0 = Tienda Física, 1 = Navegador 1, 2 = Navegador 2, 3 = Navegador 3, 4 = Navegador 4.\n"
+        "- Boletín y Vale: 1 / True = Sí, 0 / False = No."
     ),
     tools=[
         McpToolset(

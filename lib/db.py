@@ -19,7 +19,11 @@ def get_engine() -> Engine:
     url = get_database_url()
     if url.startswith("postgresql://") and "+psycopg" not in url:
         url = url.replace("postgresql://", "postgresql+psycopg://", 1)
-    return create_engine(url, pool_pre_ping=True)
+    return create_engine(
+        url,
+        pool_pre_ping=True,
+        connect_args={"connect_timeout": 3},
+    )
 
 
 ANALYTICS_SQL = """

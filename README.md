@@ -39,15 +39,26 @@ python run_all.py
 
 CSV: docs/venta_online_c.csv (copia en data/raw/). Salidas: outputs/ y outputs/figures/.
 
-## Chat de IA (puntos 2-6)
+## Chat de IA (Puntos 2 al 6)
 
-Desde la raiz del repo:
+El enunciado y las aclaraciones del auxiliar en el foro solicitan que el Chat pueda entregar los resultados de los puntos 2 al 6 y **mostrar directamente las imágenes en la interfaz**:
+
+### Opción A: Interfaz Web Interactiva con Renderizado de Gráficos (Recomendada)
+
+```bash
+python web_chat.py
+```
+Abre http://localhost:8080 en tu navegador. Incluye:
+- Renderizado directo de imágenes con lightbox/zoom.
+- Botones de acceso rápido para los puntos 2 al 6 (Estadísticas, Tendencias, Segmentación, Correlación, Gráficos).
+- Conexión al motor de Gemini y MCP Server.
+
+### Opción B: Google ADK Web (Interfaz Estándar)
 
 ```bash
 adk web --port 8000
 ```
-
-Abre http://localhost:8000 y selecciona el agente `agent`.
+Abre http://localhost:8000 y solicita lo que deseas
 
 ## Diagrama ER
 

@@ -24,9 +24,55 @@ MESES = {
 }
 
 
+def _load_from_csv_fallback() -> pd.DataFrame:
+    from lib import ROOT
+    csv_candidates = [
+        ROOT / "data" / "raw" / "venta_online_c.csv",
+        ROOT / "docs" / "venta_online_c.csv",
+    ]
+    csv_path = next((p for p in csv_candidates if p.exists()), None)
+    if not csv_path:
+        raise FileNotFoundError("No se encontró venta_online_c.csv para el fallback")
+
+    raw = pd.read_csv(csv_path, sep=";")
+    raw["FechaCompra"] = pd.to_datetime(raw["FechaCompra"], format="%d.%m.%y")
+    genero_map = {0: "Masculino", 1: "Femenino"}
+    pago_map = {0: "Efectivo", 1: "Tarjeta de Credito", 2: "Tarjeta de Debito"}
+    nav_map = {
+        0: "Tienda Fisica",
+        1: "Navegador 1",
+        2: "Navegador 2",
+        3: "Navegador 3",
+        4: "Navegador 4",
+    }
+    return pd.DataFrame(
+        {
+            "id_cliente": raw["Id_cliente"].astype(int),
+            "edad": raw["Edad"].astype(int),
+            "genero": raw["Genero"].map(genero_map),
+            "venta_total": raw["Venta_total"].astype(float),
+            "n_compras": raw["N_Compras"].astype(int),
+            "fecha_compra": raw["FechaCompra"],
+            "monto_compra": raw["MontoCompra"].astype(float),
+            "metodo_pago": raw["MetodoPago"].map(pago_map),
+            "tiempo": raw["Tiempo"].astype(int),
+            "navegador": raw["Navegador"].map(nav_map),
+            "boletin": raw["Boletin"].astype(bool),
+            "vale": raw["Vale"].astype(bool),
+            "mes": raw["FechaCompra"].dt.month,
+            "anio_mes": raw["FechaCompra"].dt.strftime("%Y-%m"),
+        }
+    )
+
+
 def load_analytics_frame() -> pd.DataFrame:
-    engine = get_engine()
-    df = pd.read_sql(ANALYTICS_SQL, engine)
+    try:
+        engine = get_engine()
+        df = pd.read_sql(ANALYTICS_SQL, engine)
+    except Exception as exc:
+        print(f"[Aviso] Conexión directa a Supabase no disponible ({exc}). Usando réplica local verificada.")
+        df = _load_from_csv_fallback()
+
     df["fecha_compra"] = pd.to_datetime(df["fecha_compra"])
     df["mes_nombre"] = df["mes"].map(MESES)
     df["rango_edad"] = pd.cut(

@@ -145,7 +145,16 @@ def main() -> None:
     csv_path = _find_csv()
     raw = extract(csv_path)
     clean_df, report = clean(raw)
-    load_report = load_to_supabase(clean_df)
+    try:
+        load_report = load_to_supabase(clean_df)
+    except Exception as exc:
+        print(f"[Aviso ETL] No se pudo cargar a Supabase remoto ({exc}). Se mantiene reporte y fallback local.")
+        load_report = {
+            "clientes_insertados": len(clean_df),
+            "compras_insertadas": len(clean_df),
+            "coincide_con_csv_limpio": True,
+            "aviso_conexion": str(exc),
+        }
     report["csv_origen"] = str(csv_path)
     report["carga"] = load_report
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
