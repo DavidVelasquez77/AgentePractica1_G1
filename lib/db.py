@@ -30,13 +30,16 @@ ANALYTICS_SQL = """
 SELECT
     c.id_cliente,
     c.edad,
+    c.genero_id,
     g.nombre AS genero,
     c.venta_total,
     c.n_compras,
     p.fecha_compra,
     p.monto_compra,
+    p.metodo_pago_id,
     m.nombre AS metodo_pago,
     p.tiempo,
+    p.navegador_id,
     n.nombre AS navegador,
     p.boletin,
     p.vale,
@@ -47,4 +50,5 @@ JOIN clientes c ON c.id_cliente = p.id_cliente
 JOIN catalogo_genero g ON g.codigo = c.genero_id
 JOIN catalogo_metodo_pago m ON m.codigo = p.metodo_pago_id
 JOIN catalogo_navegador n ON n.codigo = p.navegador_id
+
 """

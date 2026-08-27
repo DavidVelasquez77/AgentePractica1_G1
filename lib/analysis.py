@@ -50,15 +50,20 @@ def _load_from_csv_fallback() -> pd.DataFrame:
             "id_cliente": raw["Id_cliente"].astype(int),
             "edad": raw["Edad"].astype(int),
             "genero": raw["Genero"].map(genero_map),
+            "genero_cod": raw["Genero"].astype(int),
             "venta_total": raw["Venta_total"].astype(float),
             "n_compras": raw["N_Compras"].astype(int),
             "fecha_compra": raw["FechaCompra"],
             "monto_compra": raw["MontoCompra"].astype(float),
             "metodo_pago": raw["MetodoPago"].map(pago_map),
+            "metodo_pago_cod": raw["MetodoPago"].astype(int),
             "tiempo": raw["Tiempo"].astype(int),
             "navegador": raw["Navegador"].map(nav_map),
+            "navegador_cod": raw["Navegador"].astype(int),
             "boletin": raw["Boletin"].astype(bool),
             "vale": raw["Vale"].astype(bool),
+            "boletin_cod": raw["Boletin"].astype(int),
+            "vale_cod": raw["Vale"].astype(int),
             "mes": raw["FechaCompra"].dt.month,
             "anio_mes": raw["FechaCompra"].dt.strftime("%Y-%m"),
         }
@@ -69,6 +74,14 @@ def load_analytics_frame() -> pd.DataFrame:
     try:
         engine = get_engine()
         df = pd.read_sql(ANALYTICS_SQL, engine)
+        if "genero_id" in df.columns:
+            df["genero_cod"] = df["genero_id"]
+        if "metodo_pago_id" in df.columns:
+            df["metodo_pago_cod"] = df["metodo_pago_id"]
+        if "navegador_id" in df.columns:
+            df["navegador_cod"] = df["navegador_id"]
+        df["boletin_cod"] = df["boletin"].astype(int)
+        df["vale_cod"] = df["vale"].astype(int)
     except Exception as exc:
         print(f"[Aviso] Conexión directa a Supabase no disponible ({exc}). Usando réplica local verificada.")
         df = _load_from_csv_fallback()
@@ -85,21 +98,36 @@ def load_analytics_frame() -> pd.DataFrame:
 
 def _central(series: pd.Series) -> dict:
     mode = series.mode(dropna=True)
+    is_num = pd.api.types.is_numeric_dtype(series)
     return {
-        "media": float(series.mean()),
-        "mediana": float(series.median()),
-        "moda": None if mode.empty else (float(mode.iloc[0]) if pd.api.types.is_numeric_dtype(series) else str(mode.iloc[0])),
-        "desv_estandar": float(series.std(ddof=1)) if len(series) > 1 else 0.0,
-        "min": float(series.min()) if pd.api.types.is_numeric_dtype(series) else None,
-        "max": float(series.max()) if pd.api.types.is_numeric_dtype(series) else None,
+        "media": float(series.mean()) if is_num else None,
+        "mediana": float(series.median()) if is_num else None,
+        "moda": None if mode.empty else (float(mode.iloc[0]) if is_num else str(mode.iloc[0])),
+        "desv_estandar": float(series.std(ddof=1)) if (is_num and len(series) > 1) else 0.0,
+        "min": float(series.min()) if is_num else None,
+        "max": float(series.max()) if is_num else None,
         "n": int(series.dropna().shape[0]),
     }
 
 
 def estadisticas_basicas(df: pd.DataFrame | None = None) -> dict:
+    """Calcula media, mediana, moda y dispersión para todas las variables solicitadas en la rúbrica."""
     df = df if df is not None else load_analytics_frame()
-    numericas = ["edad", "venta_total", "n_compras", "monto_compra", "tiempo"]
-    return {col: _central(df[col]) for col in numericas}
+    # Variables numéricas continuas y discretas
+    cols = {
+        "edad": df["edad"],
+        "venta_total": df["venta_total"],
+        "n_compras": df["n_compras"],
+        "monto_compra": df["monto_compra"],
+        "tiempo": df["tiempo"],
+        "genero": df["genero_cod"] if "genero_cod" in df.columns else df["genero"],
+        "metodo_pago": df["metodo_pago_cod"] if "metodo_pago_cod" in df.columns else df["metodo_pago"],
+        "navegador": df["navegador_cod"] if "navegador_cod" in df.columns else df["navegador"],
+        "boletin": df["boletin_cod"] if "boletin_cod" in df.columns else df["boletin"].astype(int),
+        "vale": df["vale_cod"] if "vale_cod" in df.columns else df["vale"].astype(int),
+    }
+    return {col: _central(series) for col, series in cols.items()}
+
 
 
 def ventas_por_mes(df: pd.DataFrame | None = None) -> dict:
