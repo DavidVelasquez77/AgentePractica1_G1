@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sys
+import unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -97,7 +98,7 @@ GRAFICOS_CATALOGO = {
         "alias": ["pago", "pastel", "tarjeta", "efectivo", "contra entrega"],
         "tipo": "Gráfico de pastel / circular",
         "titulo": "Participación de ventas por método de pago",
-        "hallazgo_clave": "Tarjeta de crédito lidera con 59.1%, débito 22.7% y efectivo/contra entrega 18.6%.",
+        "hallazgo_clave": "Tarjeta de crédito lidera con 58.9%, débito 22.6% y efectivo/contra entrega 18.6%.",
     },
     "04_dispersion_edad_venta.png": {
         "id": "4",
@@ -159,6 +160,8 @@ GRAFICOS_CATALOGO = {
         "id": "11",
         "tema": "boletines_vales_mes",
         "alias": [
+            "boletin y vale",
+            "boletines y vales por mes",
             "boletin mes",
             "vale mes",
             "boletines por mes",
@@ -204,23 +207,46 @@ def obtener_grafico(consulta: str) -> str:
     
     Parámetro `consulta`: puede ser el número del gráfico ('1'..'11'), el nombre del archivo ('01_barras_ventas_mes.png') o palabras clave como 'mes', 'pago', 'edad', 'boxplot', 'heatmap', 'navegador', 'boletin', 'vale', 'boletin mes', etc.
     """
-    consulta_clean = consulta.lower().strip()
-    match = None
+    def _normalizar(value: str) -> str:
+        value = unicodedata.normalize("NFKD", value.lower().strip())
+        return "".join(char for char in value if not unicodedata.combining(char))
+
+    consulta_clean = _normalizar(consulta)
+    exact_matches = []
+    partial_matches = []
 
     for filename, info in GRAFICOS_CATALOGO.items():
-        if (
-            consulta_clean == info["id"]
-            or consulta_clean == filename.lower()
-            or any(alias in consulta_clean for alias in info["alias"])
-            or info["tema"] in consulta_clean
-        ):
-            match = (filename, info)
-            break
+        filename_clean = _normalizar(filename)
+        tema_clean = _normalizar(info["tema"])
+        aliases_clean = [_normalizar(alias) for alias in info["alias"]]
 
-    if not match:
-        match = list(GRAFICOS_CATALOGO.items())[0]
+        if consulta_clean == info["id"] or consulta_clean == filename_clean:
+            exact_matches.append((10_000, filename, info))
+            continue
+        if consulta_clean == tema_clean or consulta_clean in aliases_clean:
+            exact_matches.append((5_000 + len(consulta_clean), filename, info))
+            continue
 
-    filename, info = match
+        candidates = [alias for alias in aliases_clean if alias in consulta_clean]
+        if tema_clean in consulta_clean:
+            candidates.append(tema_clean)
+        if candidates:
+            partial_matches.append((max(map(len, candidates)), filename, info))
+
+    matches = exact_matches or partial_matches
+    if not matches:
+        return _dump(
+            {
+                "error": f"No se encontró una visualización para: {consulta}",
+                "opciones": [
+                    {"id": info["id"], "titulo": info["titulo"], "tema": info["tema"]}
+                    for info in GRAFICOS_CATALOGO.values()
+                ],
+            }
+        )
+
+    _, filename, info = max(matches, key=lambda item: item[0])
+
     fig_path = FIG_DIR / filename
 
     return _dump(

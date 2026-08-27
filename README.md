@@ -4,6 +4,8 @@ Practica SOG2: analista junior, base relacional en Supabase (nube), Python, Goog
 
 Nombre del repositorio publico (indicacion del auxiliar): `AgentePractica1_G1`. El PDF debe incluir el link de GitHub.
 
+Repositorio: https://github.com/DavidVelasquez77/Practica-Gerenciales2-Grupo1
+
 ## Integrantes - Grupo 1
 
 | Integrantes | Carnet |
