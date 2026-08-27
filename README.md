@@ -4,6 +4,16 @@ Practica SOG2: analista junior, base relacional en Supabase (nube), Python, Goog
 
 Nombre del repositorio publico (indicacion del auxiliar): `AgentePractica1_G1`. El PDF debe incluir el link de GitHub.
 
+## Integrantes - Grupo 1
+
+| Integrantes | Carnet |
+| :--- | :--- |
+| JOSUÉ DAVID VELÁSQUEZ IXCHOP | 202307705 |
+| ENNER ESAÍ MENDIZABAL CASTRO | 202302220 |
+| GAHEL ALEJANDRO HERRERA JUMÉNEZ | 202307629 |
+| JOSÉ EMILIO MORALES CASTILLO | 202300636 |
+| BRANDON ANTONIO MARROQUIN PÉREZ | 202300813 |
+
 ## Requisitos
 
 - Python 3.10+
