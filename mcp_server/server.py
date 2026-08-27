@@ -155,12 +155,31 @@ GRAFICOS_CATALOGO = {
         "titulo": "Ventas según redención de vales",
         "hallazgo_clave": "Clientes con vale generan un ticket promedio de Q44.95 vs Q38.55 de los clientes sin vale.",
     },
+    "11_tendencia_boletines_vales_mes.png": {
+        "id": "11",
+        "tema": "boletines_vales_mes",
+        "alias": [
+            "boletin mes",
+            "vale mes",
+            "boletines por mes",
+            "vales por mes",
+            "promociones por mes",
+            "tendencia promociones",
+            "meses boletin",
+            "meses vale",
+            "3d",
+            "tendencias promociones",
+        ],
+        "tipo": "Gráfico de barras agrupadas mensual",
+        "titulo": "Uso mensual de boletines y vales (Punto 3.d)",
+        "hallazgo_clave": "Diciembre y Marzo fueron los meses con mayor uso de boletines (262 y 261) y Marzo y Diciembre con mayor redención de vales (133 y 128), coincidiendo con las temporadas pico de venta.",
+    },
 }
 
 
 @mcp.tool()
 def listar_graficos() -> str:
-    """Lista las visualizaciones disponibles (10 gráficos generados, cumpliendo los 7 tipos requeridos) con su ID, tipo, título y hallazgo clave."""
+    """Lista las visualizaciones disponibles (11 gráficos generados, cumpliendo los 7 tipos requeridos) con su ID, tipo, título y hallazgo clave."""
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     resumen = []
     for filename, info in GRAFICOS_CATALOGO.items():
@@ -183,7 +202,7 @@ def listar_graficos() -> str:
 def obtener_grafico(consulta: str) -> str:
     """Obtiene la información, hallazgo y referencia markdown de una visualización específica para renderizarla directamente en el chat.
     
-    Parámetro `consulta`: puede ser el número del gráfico ('1'..'10'), el nombre del archivo ('01_barras_ventas_mes.png') o palabras clave como 'mes', 'pago', 'edad', 'boxplot', 'heatmap', 'navegador', 'boletin', 'vale', etc.
+    Parámetro `consulta`: puede ser el número del gráfico ('1'..'11'), el nombre del archivo ('01_barras_ventas_mes.png') o palabras clave como 'mes', 'pago', 'edad', 'boxplot', 'heatmap', 'navegador', 'boletin', 'vale', 'boletin mes', etc.
     """
     consulta_clean = consulta.lower().strip()
     match = None

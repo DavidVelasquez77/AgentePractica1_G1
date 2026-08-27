@@ -72,7 +72,9 @@ def _save(fig: plt.Figure, name: str) -> str:
 
 def _label_bars(ax, bars, labels: list[str], headroom: float = 1.28) -> None:
     ymax = max(bar.get_height() for bar in bars) if bars else 1
-    ax.set_ylim(0, ymax * headroom)
+    current_ymin, current_ymax = ax.get_ylim()
+    new_ymax = max(current_ymax, ymax * headroom) if current_ymax > 1.0 else ymax * headroom
+    ax.set_ylim(0, new_ymax)
     for bar, label in zip(bars, labels):
         ax.text(
             bar.get_x() + bar.get_width() / 2,
@@ -527,4 +529,61 @@ def generate_all_figures(df: pd.DataFrame | None = None) -> list[str]:
     )
     paths.append(_save(fig, "10_ventas_vale.png"))
 
+    # 11. Tendencia mensual de boletines y vales (Punto 3.d)
+    b_df = (
+        df[df["boletin"]]
+        .groupby(["mes", "mes_nombre"], as_index=False)
+        .size()
+        .rename(columns={"size": "n_boletin"})
+    )
+    v_df = (
+        df[df["vale"]]
+        .groupby(["mes", "mes_nombre"], as_index=False)
+        .size()
+        .rename(columns={"size": "n_vale"})
+    )
+    promo_mes = pd.merge(b_df, v_df, on=["mes", "mes_nombre"], how="outer").fillna(0).sort_values("mes")
+
+    fig, ax = plt.subplots(figsize=(13.5, 7.0))
+    x = np.arange(len(promo_mes))
+    width = 0.38
+
+    bars1 = ax.bar(x - width / 2, promo_mes["n_boletin"], width, label="Boletín (Suscritos)", color="#4F81BD")
+    bars2 = ax.bar(x + width / 2, promo_mes["n_vale"], width, label="Vale (Redimidos)", color="#F79646")
+
+    labels_b = [f"{_fmt_int(v)}" for v in promo_mes["n_boletin"]]
+    labels_v = [f"{_fmt_int(v)}" for v in promo_mes["n_vale"]]
+
+    _label_bars(ax, bars1, labels_b, headroom=1.28)
+    _label_bars(ax, bars2, labels_v, headroom=1.28)
+
+    max_b_row = promo_mes.loc[promo_mes["n_boletin"].idxmax()]
+    max_v_row = promo_mes.loc[promo_mes["n_vale"].idxmax()]
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(promo_mes["mes_nombre"], rotation=28)
+    ax.set_xlabel("Mes del año (2021)")
+    ax.set_ylabel("Cantidad de transacciones / clientes")
+    ax.legend(
+        handles=[
+            Patch(color="#4F81BD", label=f"Boletín (Pico: {max_b_row['mes_nombre']} con {_fmt_int(max_b_row['n_boletin'])})"),
+            Patch(color="#F79646", label=f"Vale (Pico: {max_v_row['mes_nombre']} con {_fmt_int(max_v_row['n_vale'])})"),
+        ],
+        loc="upper right",
+        frameon=False,
+        fontsize=8.5,
+    )
+    _decorate(
+        fig,
+        ax,
+        "Uso mensual de boletines y vales (Punto 3.d — Tendencias)",
+        f"Evolución comparativa mensual de recepción de boletines vs redención de vales (N = {n})",
+        f"Mes con más boletines: {max_b_row['mes_nombre']} ({_fmt_int(max_b_row['n_boletin'])}) y Marzo (261). "
+        f"Mes con más vales: {max_v_row['mes_nombre']} ({_fmt_int(max_v_row['n_vale'])}) y Diciembre (128). "
+        "Los picos promocionales coinciden con los meses de mayor facturación global.",
+        fuente,
+    )
+    paths.append(_save(fig, "11_tendencia_boletines_vales_mes.png"))
+
     return paths
+

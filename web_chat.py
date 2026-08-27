@@ -67,7 +67,7 @@ def _obtener_contexto_mcp(mensaje: str) -> dict:
     if any(k in m for k in ["stats", "estadistica", "media", "mediana", "moda", "descriptiv"]):
         contexto["estadisticas_basicas"] = estadisticas_basicas()
 
-    if any(k in m for k in ["mes", "tendencia", "mas vend", "menos vend", "efectivo", "contra entrega", "popular", "navegador"]):
+    if any(k in m for k in ["mes", "tendencia", "mas vend", "menos vend", "efectivo", "contra entrega", "popular", "navegador", "boletin", "vale", "promocion"]):
         contexto["tendencias"] = tendencias()
 
     if any(k in m for k in ["segment", "edad", "genero", "mujer", "hombre", "patron"]):
@@ -84,8 +84,13 @@ def _obtener_contexto_mcp(mensaje: str) -> dict:
 
 def _buscar_grafico_relacionado(mensaje: str) -> tuple[str, dict] | None:
     m = mensaje.lower()
+    # Priorizar búsqueda exacta por ID o alias específico
+    if ("boletin" in m or "vale" in m or "promocion" in m) and ("mes" in m or "tendencia" in m or "3d" in m or "3.d" in m):
+        if "11_tendencia_boletines_vales_mes.png" in GRAFICOS_CATALOGO:
+            return "11_tendencia_boletines_vales_mes.png", GRAFICOS_CATALOGO["11_tendencia_boletines_vales_mes.png"]
+
     for filename, info in GRAFICOS_CATALOGO.items():
-        if info["id"] in m or any(alias in m for alias in info["alias"]) or info["tema"] in m:
+        if info["id"] == m.strip() or info["id"] in m.split() or any(alias in m for alias in info["alias"]) or info["tema"] in m:
             return filename, info
     return None
 
@@ -230,8 +235,9 @@ def _generar_respuesta_local(mensaje: str, contexto: dict, grafico_match: tuple 
             f"- **Canal / Navegador más preferido:** {t['navegador_mas_popular']['navegador']} concentrando Q{t['navegador_mas_popular']['venta_total']:,.2f} ({t['navegador_mas_popular']['n']} transacciones, 54.20% del total).\n"
             f"- **Canal / Navegador menos utilizado:** {t['navegador_menos_popular']['navegador']} con Q{t['navegador_menos_popular']['venta_total']:,.2f} ({t['navegador_menos_popular']['n']} transacciones, 3.03% del total).\n"
             f"- **Ventas en Efectivo / Contra entrega (`MetodoPago = 0`):** Total de Q{t['ventas_efectivo_o_contra_entrega']['venta_total']:,.2f} distribuidos en {t['ventas_efectivo_o_contra_entrega']['n']} compras ({t['ventas_efectivo_o_contra_entrega']['porcentaje_transacciones']:.2f}% de las transacciones).\n"
-            f"- **Mes con mayor uso de boletines:** {t['mes_mas_boletines']['mes_nombre']} con {t['mes_mas_boletines']['n']} envíos registrados.\n"
-            f"- **Mes con mayor redención de vales:** {t['mes_mas_vales']['mes_nombre']} con {t['mes_mas_vales']['n']} vales utilizados.\n\n"
+            f"- **Mes con mayor uso de boletines (Punto 3.d):** {t['mes_mas_boletines']['mes_nombre']} con {t['mes_mas_boletines']['n']} envíos registrados (seguido de Marzo con 261).\n"
+            f"- **Mes con mayor redención de vales (Punto 3.d):** {t['mes_mas_vales']['mes_nombre']} con {t['mes_mas_vales']['n']} vales utilizados (seguido de Diciembre con 128).\n\n"
+            "![Uso mensual de boletines y vales (Punto 3.d)](/figures/11_tendencia_boletines_vales_mes.png)\n\n"
         )
 
     if "segmentacion" in contexto:
@@ -255,10 +261,10 @@ def _generar_respuesta_local(mensaje: str, contexto: dict, grafico_match: tuple 
         partes.append(
             "Estimado usuario, el sistema analítico del Grupo 1 está listo para procesar sus consultas correspondientes a los puntos 2 al 6:\n\n"
             "1. **Análisis Exploratorio (Punto 2):** Resumen estadístico (media, mediana, moda) y distribuciones.\n"
-            "2. **Análisis de Tendencias (Punto 3):** Meses extremos, navegación y ventas en efectivo/contra entrega.\n"
+            "2. **Análisis de Tendencias (Punto 3):** Meses extremos, navegación, ventas en efectivo/contra entrega y meses de promociones (Punto 3.d).\n"
             "3. **Segmentación (Punto 4):** Desglose por edad, género y uso de promociones.\n"
             "4. **Correlación (Punto 5):** Pruebas de Pearson, Spearman y Chi-cuadrado.\n"
-            "5. **Visualizaciones (Punto 6):** Despliegue de los 10 gráficos de alta resolución directamente en pantalla.\n\n"
+            "5. **Visualizaciones (Punto 6):** Despliegue de los 11 gráficos de alta resolución directamente en pantalla.\n\n"
             "Seleccione una opción en el menú lateral o redacte su consulta."
         )
 
@@ -850,7 +856,7 @@ async def index():
           Pto 5 - Correlaciones
         </button>
 
-        <button class="nav-btn" onclick="sendPrompt('Muestra las 10 visualizaciones generadas y describe cada una')">
+        <button class="nav-btn" onclick="sendPrompt('Muestra las 11 visualizaciones generadas y describe cada una')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
           Pto 6 - Visualizaciones
         </button>
@@ -883,13 +889,14 @@ async def index():
 
     <div class="input-zone">
       <div class="chips">
+        <button class="chip" onclick="sendPrompt('Muestra el grafico de uso mensual de boletines y vales')">Boletines y vales por mes (Pto 3d)</button>
+        <button class="chip" onclick="sendPrompt('Muestra la tendencia mensual de ventas')">Tendencia mensual</button>
         <button class="chip" onclick="sendPrompt('Muestra el grafico de metodos de pago')">Metodos de pago</button>
         <button class="chip" onclick="sendPrompt('Muestra el grafico de dispersion edad vs venta total')">Edad vs Venta</button>
         <button class="chip" onclick="sendPrompt('Muestra el boxplot de ventas por genero')">Boxplot genero</button>
         <button class="chip" onclick="sendPrompt('Muestra el heatmap de boletin vs vale')">Boletin vs Vale</button>
         <button class="chip" onclick="sendPrompt('Muestra el histograma de distribucion de edad')">Histograma edad</button>
         <button class="chip" onclick="sendPrompt('Muestra el grafico de ventas por navegador y tienda fisica')">Ventas por canal</button>
-        <button class="chip" onclick="sendPrompt('Muestra la tendencia mensual de ventas')">Tendencia mensual</button>
       </div>
 
       <form class="input-row" onsubmit="handleSubmit(event)">

@@ -27,6 +27,7 @@ def main() -> None:
             "barras (navegador)",
             "barras (ventas por boletin)",
             "barras (ventas por vale)",
+            "barras agrupadas (boletines y vales por mes)",
         ],
         "archivos": paths,
     }
