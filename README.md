@@ -1,10 +1,10 @@
 # AgentePractica1_G1
 
-Practica SOG2: analista junior, base relacional en Supabase (nube), Python, Google ADK + MCP Server, modelo Gemini 3.5 Flash-Lite.
+Practica SOG2: analista junior, base relacional en Supabase (nube), Python, Google ADK + MCP Server, modelo Gemini configurable mediante `GEMINI_MODEL`.
 
 Nombre del repositorio publico (indicacion del auxiliar): `AgentePractica1_G1`. El PDF debe incluir el link de GitHub.
 
-Repositorio: https://github.com/DavidVelasquez77/Practica-Gerenciales2-Grupo1
+Repositorio: [AgentePractica1_G1](https://github.com/DavidVelasquez77/AgentePractica1_G1)
 
 ## Integrantes - Grupo 1
 
@@ -22,20 +22,42 @@ Repositorio: https://github.com/DavidVelasquez77/Practica-Gerenciales2-Grupo1
 - Cuenta Supabase (proyecto cloud: sog2-ventas-2021)
 - GOOGLE_API_KEY de Google AI Studio
 
-## Setup (companeros)
+## Setup (compañeros)
+
+Clonar el repositorio y entrar en su raíz antes de instalar:
 
 ```bash
+git clone https://github.com/DavidVelasquez77/AgentePractica1_G1.git
+cd AgentePractica1_G1
 python -m venv .venv
-source .venv/Scripts/activate
-pip install -r requirements.txt
+```
+
+En PowerShell se puede usar el intérprete del entorno sin activar scripts:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+Copy-Item .env.example .env
+```
+
+En Linux/macOS:
+
+```bash
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 cp .env.example .env
 ```
+
+Completar `.env` con un proyecto de pruebas. En PowerShell, sustituir `python` por `.\.venv\Scripts\python.exe` en los comandos posteriores si el entorno no está activado.
 
 Pide las keys reales por un canal privado, nunca por GitHub.
 
 Variables: DATABASE_URL, SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, GOOGLE_API_KEY, GEMINI_MODEL.
 
-GEMINI_MODEL por defecto: gemini-3.5-flash-lite. Alternativa: gemini-3.5-flash.
+La plantilla y el código incluyen un identificador predeterminado en `GEMINI_MODEL`. Confirmar que el modelo elegido esté habilitado en la cuenta del proveedor y ajustar la variable si hace falta; este README no garantiza su disponibilidad.
+
+## Preparar la base de datos
+
+Revisar [el esquema](db/schema.dbml) y la migración SQL en `supabase/migrations/` antes de ejecutarla en el proyecto Supabase de pruebas. Configurar `DATABASE_URL` y las claves de `.env` para ese mismo proyecto. El ETL carga datos en la base y los chats pueden hacer llamadas a Google: no son verificaciones sin efectos externos.
 
 ## Pipeline
 
