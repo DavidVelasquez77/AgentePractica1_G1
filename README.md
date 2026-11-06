@@ -1,30 +1,83 @@
-# AgentePractica1_G1
+<div align="center">
 
-Practica SOG2: analista junior, base relacional en Supabase (nube), Python, Google ADK + MCP Server, modelo Gemini configurable mediante `GEMINI_MODEL`.
+# 🤖 Analista de ventas — datos, herramientas y conversación
 
-Nombre del repositorio publico (indicacion del auxiliar): `AgentePractica1_G1`. El PDF debe incluir el link de GitHub.
+**Pipeline analítico de ventas online con Python, Supabase, Google ADK y MCP**
 
-Repositorio: [AgentePractica1_G1](https://github.com/DavidVelasquez77/AgentePractica1_G1)
+![Python](https://img.shields.io/badge/Python-An%C3%A1lisis%20de%20datos-3776AB?style=for-the-badge)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=for-the-badge)
+![Google ADK](https://img.shields.io/badge/Google%20ADK-Agente%20conversacional-4285F4?style=for-the-badge)
+![MCP](https://img.shields.io/badge/MCP-Herramientas%20de%20an%C3%A1lisis-7C3AED?style=for-the-badge)
 
-## Integrantes - Grupo 1
+[Descripción](#descripción) · [Arquitectura](#arquitectura) · [Instalación](#instalación) · [Uso](#uso) · [Informe](docs/informe/SOG2-2S26_grupo1.pdf)
 
-| Integrantes | Carnet |
-| :--- | :--- |
-| JOSUÉ DAVID VELÁSQUEZ IXCHOP | 202307705 |
-| ENNER ESAÍ MENDIZABAL CASTRO | 202302220 |
-| GAHEL ALEJANDRO HERRERA JUMÉNEZ | 202307629 |
-| JOSÉ EMILIO MORALES CASTILLO | 202300636 |
-| BRANDON ANTONIO MARROQUIN PÉREZ | 202300813 |
+</div>
 
-## Requisitos
+---
 
-- Python 3.10+
-- Cuenta Supabase (proyecto cloud: sog2-ventas-2021)
-- GOOGLE_API_KEY de Google AI Studio
 
-## Setup (compañeros)
+## Descripción
 
-Clonar el repositorio y entrar en su raíz antes de instalar:
+Proyecto de **Sistemas Organizacionales y Gerenciales 2, grupo 1** que reúne preparación de datos, análisis estadístico y una interfaz conversacional para explorar ventas online de 2021. El usuario puede consultar tendencias, segmentos de clientes, correlaciones y gráficos mediante un agente conectado a herramientas MCP.
+
+El procesamiento numérico reside en Python y en las herramientas del servidor; el agente organiza la interacción con esos resultados. La separación entre **cálculo analítico** y **respuesta conversacional** permite identificar de dónde procede cada salida.
+
+## Capacidades
+
+| Área | Función |
+| --- | --- |
+| Preparación | Lectura de CSV, limpieza, tipado y carga relacional. |
+| Exploración | Estadísticos descriptivos y distribución por categorías. |
+| Tendencias | Evolución mensual y análisis por canal o método de pago. |
+| Segmentación | Agrupación por edad, género, boletín y uso de vales. |
+| Correlación | Relaciones entre variables numéricas y categóricas. |
+| Visualización | Generación de figuras y acceso desde el chat. |
+
+## Arquitectura
+
+```mermaid
+flowchart LR
+    CSV["CSV de ventas"] --> ETL["Limpieza y carga"]
+    ETL --> DB["Supabase / PostgreSQL"]
+    DB --> A["Biblioteca de análisis Python"]
+    CSV -. "respaldo local" .-> A
+    A --> OUT["Reportes JSON y figuras"]
+    A --> MCP["Servidor MCP"]
+    MCP <--> AGENT["Google ADK + Gemini"]
+    AGENT <--> ADKWEB["ADK Web"]
+    A --> WEB["Chat propio: FastAPI"]
+    OUT --> WEB
+    WEB <--> GENAI["Gemini mediante GenAI SDK"]
+```
+
+La [capa analítica](lib/analysis.py) intenta leer PostgreSQL y utiliza el CSV como respaldo si la conexión falla. Ese modo debe distinguirse de una carga cloud correcta. El [servidor MCP](mcp_server/server.py) expone funciones analíticas y referencias a figuras; la [configuración del agente](agent/agent.py) conecta ese servidor mediante stdio.
+
+Hay dos recorridos conversacionales: **ADK Web** usa el agente y MCP; el **chat propio de FastAPI** llama directamente a la biblioteca analítica y al SDK GenAI, compartiendo el catálogo de gráficos. El chat propio no inicia una sesión MCP remota para cada consulta.
+
+## Datos y pipeline
+
+El archivo `venta_online_c.csv` se conserva en [data/raw/](data/raw/venta_online_c.csv), con una copia en `docs/`. Las variables incluyen cliente, edad, género, fecha e importe de compra, número de compras, método de pago, navegador, boletín y vale.
+
+| Etapa | Entrada de ejecución | Salida principal |
+| --- | --- | --- |
+| Preparación | `01_preparacion/etl.py` | Reporte de limpieza/carga y tablas de clientes/compras. |
+| Exploración | `02_exploratorio/explorar.py` | Resumen descriptivo del conjunto. |
+| Tendencias | `03_tendencias/tendencias.py` | Patrones temporales y comerciales. |
+| Segmentación | `04_segmentacion/segmentar.py` | Comparación de grupos de clientes. |
+| Correlación | `05_correlacion/correlacion.py` | Relaciones entre variables. |
+| Visualización | `06_visualizacion/visualizar.py` | Figuras para revisión y consulta. |
+
+Los reportes se escriben en `outputs/` y las figuras en `outputs/figures/`. El [esquema DBML](db/schema.dbml), su [diagrama](db/schema.png) y la [migración SQL](supabase/migrations/20260813035003_init_schema_ventas.sql) describen la estructura relacional y los catálogos.
+
+## Instalación
+
+### Requisitos
+
+- Python 3.10 o posterior, conforme al requisito declarado por el proyecto, en un entorno compatible con `requirements.txt`.
+- Un proyecto Supabase de práctica para reproducir la carga cloud.
+- Una clave de Google AI Studio y un modelo habilitado para utilizar el chat con Gemini.
+
+### Preparar un clon limpio
 
 ```bash
 git clone https://github.com/DavidVelasquez77/AgentePractica1_G1.git
@@ -32,14 +85,14 @@ cd AgentePractica1_G1
 python -m venv .venv
 ```
 
-En PowerShell se puede usar el intérprete del entorno sin activar scripts:
+**PowerShell**, sin necesidad de activar scripts del entorno:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 Copy-Item .env.example .env
 ```
 
-En Linux/macOS:
+**Linux/macOS**:
 
 ```bash
 source .venv/bin/activate
@@ -47,59 +100,82 @@ python -m pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Completar `.env` con un proyecto de pruebas. En PowerShell, sustituir `python` por `.\.venv\Scripts\python.exe` en los comandos posteriores si el entorno no está activado.
+En PowerShell, utilizar `.\.venv\Scripts\python.exe` en lugar de `python` en los comandos posteriores si el entorno no está activado.
 
-Pide las keys reales por un canal privado, nunca por GitHub.
+### Configuración
 
-Variables: DATABASE_URL, SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, GOOGLE_API_KEY, GEMINI_MODEL.
+| Variable | Uso |
+| --- | --- |
+| `DATABASE_URL` | Conexión SQLAlchemy/PostgreSQL para carga y lectura cloud. |
+| `GOOGLE_API_KEY` | Acceso del agente al proveedor del modelo. |
+| `GEMINI_MODEL` | Identificador del modelo habilitado en la cuenta. |
+| `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | Variables incluidas en la plantilla para el entorno Supabase; la conexión analítica directa usa `DATABASE_URL`. |
+| `PORT` | Puerto del chat web; por defecto `8080`. |
 
-La plantilla y el código incluyen un identificador predeterminado en `GEMINI_MODEL`. Confirmar que el modelo elegido esté habilitado en la cuenta del proveedor y ajustar la variable si hace falta; este README no garantiza su disponibilidad.
+Completar `.env` localmente y revisar la migración antes de aplicarla en una base de práctica vacía. El identificador de modelo de la plantilla debe comprobarse en la cuenta del proveedor; puede ajustarse sin cambiar el código. Las claves de servicio y conexión pertenecen al entorno de servidor y no deben incluirse en capturas o commits.
 
-## Preparar la base de datos
+## Uso
 
-Revisar [el esquema](db/schema.dbml) y la migración SQL en `supabase/migrations/` antes de ejecutarla en el proyecto Supabase de pruebas. Configurar `DATABASE_URL` y las claves de `.env` para ese mismo proyecto. El ETL carga datos en la base y los chats pueden hacer llamadas a Google: no son verificaciones sin efectos externos.
+### Generar los análisis
 
-## Pipeline
+> **La carga ETL reemplaza los datos de las tablas `compras` y `clientes` mediante `TRUNCATE`.** Usar una base de práctica destinada a este conjunto de datos. `run_all.py` incluye esa etapa.
+
+Desde la raíz del repositorio:
 
 ```bash
-python 01_preparacion/etl.py
-python 02_exploratorio/explorar.py
-python 03_tendencias/tendencias.py
-python 04_segmentacion/segmentar.py
-python 05_correlacion/correlacion.py
-python 06_visualizacion/visualizar.py
 python run_all.py
 ```
 
-CSV: docs/venta_online_c.csv (copia en data/raw/). Salidas: outputs/ y outputs/figures/.
+El comando ejecuta las seis etapas en orden. Para trabajar una etapa concreta se puede ejecutar su script individual. Revisar los mensajes y el campo `aviso_conexion` del reporte de preparación: el fallback local permite continuar el análisis y **no confirma que Supabase haya recibido los registros**.
 
-## Chat de IA (Puntos 2 al 6)
-
-El enunciado y las aclaraciones del auxiliar en el foro solicitan que el Chat pueda entregar los resultados de los puntos 2 al 6 y **mostrar directamente las imágenes en la interfaz**:
-
-### Opción A: Interfaz Web Interactiva con Renderizado de Gráficos (Recomendada)
+### Abrir el chat
 
 ```bash
 python web_chat.py
 ```
-Abre http://localhost:8080 en tu navegador. Incluye:
-- Renderizado directo de imágenes con lightbox/zoom.
-- Botones de acceso rápido para los puntos 2 al 6 (Estadísticas, Tendencias, Segmentación, Correlación, Gráficos).
-- Conexión al motor de Gemini y MCP Server.
 
-### Opción B: Google ADK Web (Interfaz Estándar)
+Abrir `http://localhost:8080`. La interfaz permite consultar análisis y mostrar las figuras generadas; si no puede usar el proveedor del modelo, contempla respuestas analíticas estructuradas de respaldo. Como alternativa para el recorrido del agente ADK:
 
 ```bash
 adk web --port 8000
 ```
-Abre http://localhost:8000 y solicita lo que deseas
 
-## Diagrama ER
+Abrir `http://localhost:8000` y seleccionar el agente del proyecto. La configuración del agente inicia el servidor MCP; no se requiere levantar otro servidor HTTP de herramientas por separado.
 
-Pega db/schema.dbml en https://dbdiagram.io y exporta PNG/PDF para el informe.
+### Preguntas de ejemplo
 
-## Seguridad
+- ¿Cómo se distribuyen las ventas por mes y método de pago?
+- ¿Qué diferencias aparecen entre los rangos de edad?
+- ¿Qué relación existe entre edad e importe de compra?
+- Muéstrame un gráfico de ventas mensuales.
 
-- No subas .env (esta en .gitignore).
-- service_role y DATABASE_URL solo en scripts de servidor.
-- Las tablas tienen RLS; el analisis usa la conexion Postgres.
+Las respuestas numéricas deben contrastarse con los reportes y las herramientas, especialmente si se cambia el CSV o se utiliza el modo de respaldo local.
+
+## Estructura
+
+```text
+01_preparacion/ … 06_visualizacion/  Etapas del pipeline
+lib/                                Acceso a datos, análisis y gráficos
+agent/                              Agente ADK y conexión MCP
+mcp_server/                         Herramientas de consulta
+data/raw/                           Dataset del ejercicio
+db/                                 Esquema DBML y diagrama
+supabase/migrations/                 Definición SQL y catálogos
+outputs/                            Reportes y figuras generados localmente
+web_chat.py                         Interfaz conversacional
+run_all.py                          Ejecución secuencial del pipeline
+```
+
+## Equipo y evidencia
+
+| Integrante | Carné |
+| --- | --- |
+| Josué David Velásquez Ixchop | 202307705 |
+| Enner Esaí Mendizabal Castro | 202302220 |
+| Gahel Alejandro Herrera Jiménez | 202307629 |
+| José Emilio Morales Castillo | 202300636 |
+| Brandon Antonio Marroquín Pérez | 202300813 |
+
+[Informe académico final](docs/informe/SOG2-2S26_grupo1.pdf) · [Estado documentado del proyecto](docs/state.md)
+
+La revisión de este cambio comprobó la documentación y la sintaxis de las fuentes. Ejecutar el pipeline contra Supabase o el chat con Gemini requiere las credenciales del entorno y una verificación funcional independiente.
