@@ -136,6 +136,14 @@ python web_chat.py
 
 Abrir `http://localhost:8080`. La interfaz permite consultar análisis y mostrar las figuras generadas; si no puede usar el proveedor del modelo, contempla respuestas analíticas estructuradas de respaldo. Como alternativa para el recorrido del agente ADK:
 
+En **PowerShell**, usando el entorno sin activar:
+
+```powershell
+.\.venv\Scripts\adk.exe web --port 8000
+```
+
+En **Linux/macOS**, con el entorno activado según los pasos anteriores:
+
 ```bash
 adk web --port 8000
 ```
